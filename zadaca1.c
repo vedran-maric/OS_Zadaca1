@@ -4,23 +4,25 @@
 #include <unistd.h>
 #include <math.h>
 
-/*Zadaca1 - MALO TI FALI DA RIJESIS!! SAMO TREBAS NEKAKO VARIJABLU ucitano OMOGUCITI DA BUDE PROCITANA UNUTAR sigusr1_handler BEZ DA BUDE GLOBALNA VARIJABLA*/
+/*Zadaca1 - MALO TI FALI DA RIJESIS!! SAMO TREBAS NEKAKO VARIJABLU ucitano OMOGUCITI DA BUDE PROCITANA UNUTAR signal_handler BEZ DA BUDE GLOBALNA VARIJABLA 
+- bolje nemoj, ne radi se klasicno prosljedjivanje vec posebne kentre*/
 int ucitano;
-/*Handler za SIGUSR1*/
+
+/*Handler za SIGNALE*/
 static void signal_handler(int signum){
 FILE *status;
 
 switch(signum){
 
 	case SIGUSR1:
-    	/* Ispiši trenutni broj */
-    	printf("(preko handlera)Trenutni broj u obradi: %d\n", ucitano);
-    	break;
+    		/* Ispiši trenutni broj */
+    		printf("(preko handlera)Trenutni broj u obradi: %d\n", ucitano);
+    		break;
 
 	case SIGTERM:
-    	/* Ispiši, spremi trenutni broj i ugasi program*/
-	    printf("Zapisujem broj u status.txt: %d\n", ucitano);
-    	status = fopen("status.txt","w");
+    		/* Ispiši, spremi trenutni broj i ugasi program*/
+	   	printf("Zapisujem broj u status.txt: %d\n", ucitano);
+    		status = fopen("status.txt","w");
 		fprintf(status, "%d\n", ucitano);
 		fclose(status);
 		exit(0);
@@ -46,8 +48,8 @@ int main(){
 FILE *obrada, *status, *obrada_pretraga;
 
 
-/* <SIGUSR 1> */
-/*Varijable za SIGUSR1*/
+/* <SIGNALI> */
+/*Varijable za SIGNALE*/
 struct sigaction sa;
 
 sa.sa_handler = signal_handler;
@@ -69,7 +71,7 @@ if (sigaction(SIGINT, &sa, NULL)==-1)
 	printf("Neka neplanirana greska je iskocila\n");
 	exit(1);
 }
-/* </SIGUSR 1> */
+/* </SIGNALI> */
 
 
 /*otvaranje datoteke*/
@@ -91,15 +93,12 @@ if (ucitano == 0)
 	}
 	ucitano = round(sqrt(pretraga));
 	fclose(obrada_pretraga);
-
 }
 
 /*Upisi broj 0 u status.txt(obrada u tijeku)*/
 status = fopen("status.txt","w");
 fprintf(status, "%d\n", 0);
 fclose(status);
-
-
 
 /*upisivanje kvadrata broja u obrada.txt*/
 obrada = fopen("obrada.txt", "a");
@@ -112,12 +111,8 @@ while (ucitano > 0 && i < 30)
 
 	i++; /*privremeno*/
 	ucitano++; /*obradjuje sljedeci broj*/
-
 }
 fclose(obrada);
-
-
-
 
 /*Upisi broj do kojeg si stao u status.txt*/
 status = fopen("status.txt","w");
